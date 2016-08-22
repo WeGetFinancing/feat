@@ -1596,7 +1596,7 @@ class Response(log.Logger):
 
     implements(IWebResponse, document.IWritableDocument)
 
-    strict_negotiation = True
+    strict_negotiation = False
 
     # map encodings unknown to Python but used by browsers to what Python
     # knows how to handle
