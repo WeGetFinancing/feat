@@ -25,7 +25,7 @@ from twisted.internet import defer
 from twisted.python import failure
 from zope.interface import implements
 
-from feat.common import decorator, fiber, error, registry
+from feat.common import decorator, fiber, error, registry, log
 from feat.common import annotate, reflect, serialization
 from feat.common.serialization.base import MetaSerializable
 from feat.common.annotate import MetaAnnotable
@@ -367,7 +367,13 @@ class Recorder(RecorderNode, annotate.Annotable):
                                          "called from inside the recording "
                                          "section" % (fun_id, ))
 
-            result = self._call_fun(fun_id, function, args, kwargs)
+            try:
+                result = self._call_fun(fun_id, function, args, kwargs)
+            except Exception as e:
+                import traceback
+                print traceback.format_exc()
+                log.error("error", "EX: " + traceback.format_exc())
+                raise e
 
         except failure.Failure as f:
             # When trapping a failure it raised itself

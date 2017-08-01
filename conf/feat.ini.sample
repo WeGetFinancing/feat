@@ -50,19 +50,20 @@ domainname: feat.lan
 
 [couchdb]
 # Host on which CouchDB server runs
-#host: localhost
+host: localhost
 
 # Port of CouchDB server
 #port: 5985
+port: 5984
 
 # Database name to be used
-#name: feat
+name: feat
 
 # Admin account username to use
-#username: admin
+username: admin
 
 # Admin password to use
-#password: password
+password: !123
 
 
 [manhole]

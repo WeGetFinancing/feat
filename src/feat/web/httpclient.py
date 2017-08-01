@@ -1,6 +1,6 @@
 from zope.interface import Interface, Attribute, implements
 
-from twisted.internet import reactor as treactor, error as terror
+from twisted.internet import reactor as treactor, error as terror, ssl
 from twisted.internet.protocol import ClientFactory, Protocol
 from twisted.internet.interfaces import ISSLTransport
 from twisted.python import failure
@@ -92,6 +92,7 @@ class ResponseDecoder(object, Protocol):
         self._buffer.append(data)
 
     def connectionLost(self, reason=None):
+        # print "CONNECTION LOST ===== > " + str(reason)
         if reason:
             self._deferred.errback(reason)
         else:
@@ -144,51 +145,58 @@ class Protocol(http.BaseProtocol):
 
     def request(self, method, location,
                 protocol=None, headers=None, body=None, decoder=None):
-        self.cancel_timeout("inactivity")
-        self.reset_timeout('headers')
+        try:
+            self.cancel_timeout("inactivity")
+            self.reset_timeout('headers')
 
-        headers = dict(headers) if headers is not None else {}
-        if body:
-            body = self._encode_body(body)
-            headers["content-length"] = len(body)
-        lines = []
-        http.compose_request(method, location, protocol, buffer=lines)
-        http.compose_headers(headers, buffer=lines)
+            headers = dict(headers) if headers is not None else {}
+            if body:
+                body = self._encode_body(body)
+                headers["content-length"] = len(body)
+            lines = []
+            http.compose_request(method, location, protocol, buffer=lines)
+            http.compose_headers(headers, buffer=lines)
 
-        seq = []
-        for line in lines:
-            line = line.encode('utf-8')
-            self.log("<<< %s", line)
-            seq.append(line)
+            seq = []
+            for line in lines:
+                line = line.encode('utf-8')
+                self.log("<<< %s", line)
+                seq.append(line)
+                seq.append("\r\n")
             seq.append("\r\n")
-        seq.append("\r\n")
 
-        if body:
-            seq.append(body)
+            if body:
+                seq.append(body)
 
-        if decoder is None:
-            decoder = ResponseDecoder()
-        # The parameters below are used to format a nice error message
-        # shall this request fail in any way
-        scheme, host, port = self._get_target()
+            if decoder is None:
+                decoder = ResponseDecoder()
+            # The parameters below are used to format a nice error message
+            # shall this request fail in any way
+            scheme, host, port = self._get_target()
 
-        decoder.request_params = {
-            'method': method.name,
-            'location': location,
-            'scheme': scheme,
-            'host': host,
-            'port': port,
-            'started_epoch': time.time()}
+            decoder.request_params = {
+                'method': method.name,
+                'location': location,
+                'scheme': scheme,
+                'host': host,
+                'port': port,
+                'started_epoch': time.time()}
 
-        self._requests.append(decoder)
+            self._requests.append(decoder)
 
-        self.transport.writeSequence(seq)
-        finished_decoding = decoder.get_result()
+            self.transport.writeSequence(seq)
+            finished_decoding = decoder.get_result()
 
-        d = defer.Deferred(canceller=self._cancel_request)
-        # Reference to decoder is unsed by canceller
-        d.decoder = decoder
-        finished_decoding.chainDeferred(d)
+            d = defer.Deferred(canceller=self._cancel_request)
+            # Reference to decoder is unsed by canceller
+            d.decoder = decoder
+            finished_decoding.chainDeferred(d)
+
+        except Exception, e:
+            import traceback
+            print traceback.format_exc()
+            log.error("http_client", traceback.format_exc())
+            raise e
         return d
 
     ### Overridden Methods ###
@@ -520,8 +528,20 @@ class Connection(log.LogProxy, log.Logger):
 
         if self._security_policy.use_ssl:
             context_factory = self._security_policy.get_ssl_context_factory()
-            # the reference to connector is given to the Deferred to be
-            # used by its cancellator (cancel_connector)
+            ## the reference to connector is given to the Deferred to be
+            ## used by its cancellator (cancel_connector)
+            ## print "THE HOSTNAME IS: " + self._host
+            # options = ssl.optionsForClientTLS(hostname=unicode(self._host))
+            # options._ctx = context_factory.getContext()
+            ## factory.options = options
+
+            # NOTE: Change context_factory with options to enable SNI support, but disable cert
+            # support. This is not important, as we have already migrated most service calls away
+            # from this codeline. Only postbacks are using this.
+
+            # FIXME We should merge the certs from the context_factory with options
+            # So, this fix does not permit usage of client certs, but supports SNI
+
             d.connector = self.reactor.connectSSL(self._host, self._port,
                                              factory, context_factory,
                                              **kwargs)

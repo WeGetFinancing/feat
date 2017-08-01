@@ -11,3 +11,4 @@ src/standalone.log
 log/*
 *.pyc
 feat.egg-info/
+conf/feat.ini

@@ -83,6 +83,8 @@ class Schemes(enum.Enum):
 
 class Status(enum.Enum):
 
+    # FIXME: Although I have added most of them, this enum may not contemplate some codes.
+    # FIXME: THis should be refactored to something more flexible.
     OK = 200
     CREATED = 201
     ACCEPTED = 202
@@ -99,6 +101,7 @@ class Status(enum.Enum):
     NOT_MODIFIED = 304
     USE_PROXY = 305
     TEMPORARY_REDIRECT = 307
+    PERMANENT_REDIRECT = 308
 
     BAD_REQUEST = 400
     UNAUTHORIZED = 401
@@ -128,6 +131,11 @@ class Status(enum.Enum):
     HTTP_VERSION_NOT_SUPPORTED = 505
     INSUFFICIENT_STORAGE_SPACE = 507
     NOT_EXTENDED = 510
+    NETWORK_READ_TIMEOUT = 598
+    NETWORK_CONNECT_TIMEOUT = 599
+
+    # Code when the status is not found within this enum.
+    MISSING_FEAT_STATUS = 999
 
     def is_error(self):
         return self >= 400
