@@ -12,3 +12,4 @@ log/*
 *.pyc
 feat.egg-info/
 conf/feat.ini
+*.log

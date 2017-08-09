@@ -254,7 +254,7 @@ def handle_failure(source, failure, template, *args, **kwargs):
     else:
         msg = get_failure_message(failure)
         logger.error(template + ": %s", *(args + (msg, )))
-        logger.error("EX: " + "".join(traceback.format_stack()))
+        logger.debug("EX: " + "".join(traceback.format_stack()))
 
     if log.verbose:
         if info:

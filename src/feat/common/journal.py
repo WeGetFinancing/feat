@@ -372,7 +372,7 @@ class Recorder(RecorderNode, annotate.Annotable):
             except Exception as e:
                 import traceback
                 print traceback.format_exc()
-                log.error("error", "EX: " + traceback.format_exc())
+                log.debug("error", "EX: " + traceback.format_exc())
                 raise e
 
         except failure.Failure as f:
