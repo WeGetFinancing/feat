@@ -137,6 +137,7 @@ class Status(enum.Enum):
     NETWORK_CONNECT_TIMEOUT = 599
 
     # Code when the status is not found within this enum.
+    SERVER_ERROR_CODE_911 = 911
     MISSING_FEAT_STATUS = 999
 
     def is_error(self):

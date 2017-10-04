@@ -13,3 +13,5 @@ log/*
 feat.egg-info/
 conf/feat.ini
 *.log
+/conf/conf.d/featcredex.ini
+/run/feat.pid

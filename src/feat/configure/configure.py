@@ -22,10 +22,20 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import os
+use_system_feat = False
 
-try:
-    from feat.configure import uninstalled as _config
-except ImportError:
+# Do not read the uninstalled.py file if the /etc/feat/feat.ini file is found.
+if os.path.isfile('/etc/feat/feat.ini'):
+    use_system_feat = True
+
+if not use_system_feat:
+    try:
+        from feat.configure import uninstalled as _config
+    except ImportError:
+        use_system_feat = True
+
+if use_system_feat:
     from feat.configure import installed as _config
 
 
