@@ -477,9 +477,9 @@ class BaseProtocol(log.Logger, basic.LineReceiver, timeout.Mixin):
         self.log(">>> %s", line)
 
         self._header_count += 1
-        if self._header_count > self.max_headers:
-            self._error(ParseError("Too much http headers"))
-            return
+        # if self._header_count > self.max_headers:
+        #     self._error(ParseError("Too much http headers"))
+        #     return
 
         header, data = line.split(':', 1)
         header = header.lower()
