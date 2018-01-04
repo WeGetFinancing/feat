@@ -153,7 +153,7 @@ class Enum(int):
             return NotImplemented
 
     def __str__(self):
-        return '<%s value %s>' % (
+        return '"<%s value %s>"' % (
             self.__class__.__name__, self.name)
 
     def __nonzero__(self):
