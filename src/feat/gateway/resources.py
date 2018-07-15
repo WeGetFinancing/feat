@@ -699,6 +699,7 @@ class Root(BaseResource):
     def __init__(self, hostname, port, source, label=None, static_path=None):
         self.source = source
         self.hostname = hostname
+        self.request_host = self.hostname
         self.port = port
         if label:
             self.label = label
@@ -711,13 +712,14 @@ class Root(BaseResource):
         if request_host is not None:
             if ':' in request_host:
                 request_host = request_host.split(":", 1)[0]
-            if request_host != self.hostname:
-                new_uri = "%s://%s:%s%s" % (
-                    request.scheme.name.lower(),
-                    self.hostname,
-                    self.port,
-                    http.tuple2path(location + remaining))
-                return Redirect(new_uri)
+            # if request_host != self.hostname:
+            #     new_uri = "%s://%s:%s%s" % (
+            #         request.scheme.name.lower(),
+            #         self.hostname,
+            #         self.port,
+            #         http.tuple2path(location + remaining))
+            #     return Redirect(new_uri)
+        self.request_host = request_host
 
         if self._static and remaining[0] == u"static":
             return self._static, remaining[1:]
@@ -727,7 +729,7 @@ class Root(BaseResource):
     ### private ###
 
     def _build_root(self, request):
-        root = (self.hostname, self.port)
+        root = (self.request_host, self.port)
         model = IModel(self.source)
         officer = DummyOfficer(request.peer_info)
 
