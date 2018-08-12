@@ -32,6 +32,8 @@ flulog = None #dynamicaly imported from FluLogKeeper.init()
 
 verbose = os.environ.get("FEAT_VERBOSE", "NO").upper() in ("YES", "1", "TRUE")
 
+from feat.log2sentry import SentryReporter
+
 
 def init(path=None):
     '''Initialize the logging module. Construct the LogTee as the default
@@ -200,6 +202,7 @@ class LogTee(object):
     def __init__(self):
         # name -> ILogKeeper
         self._logkeepers = dict()
+        self.sentry = SentryReporter()
 
     def add_keeper(self, name, logkeeper):
         if name in self._logkeepers:
@@ -220,6 +223,17 @@ class LogTee(object):
 
     def do_log(self, level, object, category, format, args,
                depth=2, file_path=None, line_num=None):
+        if level in (LogLevel.error, LogLevel.warning):
+            try:
+                sentry_handler = self.sentry.get_client()
+                if sentry_handler:
+                    sentry_handler.captureException()
+            except Exception:
+                pass
+            try:
+                sentry_handler.captureMessage("%s %s" % (category, format % args))
+            except Exception:
+                pass
         for logkeeper in self._logkeepers.itervalues():
             logkeeper.do_log(
                 level, object, category, format, args,

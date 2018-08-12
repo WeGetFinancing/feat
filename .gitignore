@@ -14,4 +14,6 @@ feat.egg-info/
 conf/feat.ini
 *.log
 /conf/conf.d/featcredex.ini
+/conf/conf.d/local.ini
 /run/feat.pid
+*.iml
