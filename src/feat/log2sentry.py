@@ -36,7 +36,8 @@ class SentryReporter(object):
                 kwargs['tags']['revision'] = releaseconfig.version_revision
                 kwargs['tags']['revision_date'] = releaseconfig.version_date
                 kwargs['tags']['branch'] = releaseconfig.version_branch
-            except ImportError, AttributeError:
+                kwargs['tags']['sprint'] = releaseconfig.version_sprint
+            except Exception:
                 pass
 
             self.client = Client(**kwargs)
