@@ -156,6 +156,10 @@ class Enum(int):
         return '"<%s value %s>"' % (
             self.__class__.__name__, self.name)
 
+    def __json__(self):
+        return '"<%s value %s>"' % (
+            self.__class__.__name__, self.name)
+
     def __nonzero__(self):
         return True
 
