@@ -269,8 +269,8 @@ class Database(common.ConnectionManager, log.LogProxy, ChangeListener):
     log_category = "database"
 
     LoopingCall = task.LoopingCall
-    # we should take roughly 10MB of cache
-    DESIRED_CACHE_SIZE = 10 * 1024 * 1024
+    # we should take roughly 3*10MB of cache
+    DESIRED_CACHE_SIZE = 3 * 10 * 1024 * 1024
 
     def __init__(self, host, port, db_name, username=None, password=None,
                  https=False):
@@ -784,7 +784,7 @@ class Cache(dict):
     url -> CacheEntry
     '''
 
-    DEFAULT_DESIRED_SIZE = 10 * 1024 * 1024
+    DEFAULT_DESIRED_SIZE = 3 * 10 * 1024 * 1024
     OPERATIONS_PER_CLEANUP = 500
 
     def __init__(self, desired_size=None):
