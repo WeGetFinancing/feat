@@ -1,0 +1,6 @@
+# Normal dep packages
+bumpversion==0.5.3
+wheel==0.31.1
+watchdog==0.9.0
+tox==3.4.0
+twine==1.11.0

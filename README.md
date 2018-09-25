@@ -1,5 +1,10 @@
 FEAT => F3AT => Flumotion Asynchronous Autonomous Agent Toolkit
 
+=== Important ===
+This project is deprecated and abandoned by its original authors.
+
+This is a forked version that we maintain within GetFinancing for our legacy services.
+
 === Repository ===
 
 Get the code::

@@ -1,0 +1,4 @@
+raven==6.9.0
+zope.interface==4.5.0
+twisted==14.0.2
+pyOpenSSL==17.3.0

@@ -7,6 +7,28 @@ PEP8 = ${TOOLS}/pep8.py --repeat
 SHOW_COVERAGE = ${TOOLS}/show-coverage.py
 GIT_REVISION = $(shell git describe || echo 'unknown')
 
+clean: clean-build clean-pyc clean-test ##@build remove all build, test, coverage and Python artifacts
+
+clean-build: ##@build remove build artifacts
+	rm -fr build/
+	rm -fr dist/
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
+
+clean-pyc: ##@build remove Python file artifacts
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
+
+clean-test: ##@build remove test and coverage artifacts
+	rm -fr .tox/
+	rm -f .coverage
+	rm -fr htmlcov/
+	rm -fr .pytest_cache
+
+
 check-local: check-tests check-local-pep8
 
 check-local-pep8:
