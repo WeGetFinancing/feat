@@ -234,6 +234,7 @@ def _solve_merge(connection, doc, conflicts):
         #raise UnsolvableConflict("Failed to find common ancestor", doc)
         connection.warning("Failed to find common ancestor, maybe history was lost, thus I will apply the db_winner strategy. doc_id: %s", doc.doc_id)
         yield _solve_db_winner(connection, doc, conflicts)
+        return
 
     try:
         root = yield connection.get_document(doc.doc_id, rev=root_rev)
