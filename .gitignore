@@ -17,3 +17,4 @@ conf/feat.ini
 /conf/conf.d/local.ini
 /run/feat.pid
 *.iml
+.envrc
