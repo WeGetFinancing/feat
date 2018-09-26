@@ -29,7 +29,9 @@ except ImportError:  # for pip <= 9.0.3
     from pip.req import parse_requirements
     from pip.download import PipSession
 
+import sys
 import os
+from glob import glob
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -60,6 +62,9 @@ test_requirements = []
 
 description = 'Flumotion Asynchronous Autonomous Agent Toolkit'
 
+var_prefix = '/var'
+usr_prefix = sys.prefix
+
 setup(
     author='Flumotion Developers, GetFinancing Development Team',
     author_email='it@getfinancing.com',
@@ -85,11 +90,36 @@ setup(
     name='feat',
     package_dir={'': 'src'},
     packages=find_packages('src'),
+    data_files=[
+        (os.path.join(var_prefix, 'lib', 'feat'), []),
+        (os.path.join(var_prefix, 'lock', 'feat'), []),
+        (os.path.join(var_prefix, 'log', 'feat'), []),
+        (os.path.join(var_prefix, 'run', 'feat'), []),
+        (os.path.join('share', 'python-feat', 'gateway', 'static'), glob('gateway/static/*.css')),
+        (os.path.join('share', 'python-feat', 'gateway', 'static', 'images'),
+         glob('gateway/static/images/*.gif')),
+        (os.path.join('share', 'python-feat', 'gateway', 'static', 'script'),
+         glob('gateway/static/script/*.js')),
+        (os.path.join('/etc', 'feat'),
+         [
+             'conf/authorized_keys',
+             'conf/client.p12',
+             'conf/client_private_key.pem',
+             'conf/client_public_cert.pem',
+             'conf/gateway.p12',
+             'conf/gateway_ca.pem',
+             'conf/private.key',
+             'conf/public.key',
+             'conf/tunneling.p12',
+         ]
+         ),
+    ],
     scripts=['bin/feat',
              'bin/feat-service',
              'bin/feat-couchpy',
              'bin/feat-dbload',
-             'bin/feat-locate'],
+             'bin/feat-locate',
+             'sbin/feat-update-nagios'],
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
