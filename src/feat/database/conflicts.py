@@ -165,11 +165,11 @@ def solve(connection, doc_id):
         return
     doc = connection._unserializer.convert(plain_doc)
     if not IDocument.providedBy(doc):
-        handler = _solve_alert
+        handler = _solve_merge
     else:
         strategy_handlers = {
             ConflictResolutionStrategy.db_winner: _solve_db_winner,
-            ConflictResolutionStrategy.alert: _solve_alert,
+            ConflictResolutionStrategy.alert: _solve_merge,
             ConflictResolutionStrategy.merge: _solve_merge}
         s = type(doc).conflict_resolution_strategy
         handler = strategy_handlers.get(s, _solve_alert)
