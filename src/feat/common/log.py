@@ -231,7 +231,12 @@ class LogTee(object):
             except Exception:
                 pass
             try:
-                sentry_handler.captureMessage("%s %s" % (category, format % args))
+                if level == LogLevel.error:
+                    sentry_handler.captureMessage("%s %s" % (category, format % args))
+                else:
+                    sentry_handler.captureMessage("%s %s" % (category, format % args,), extra={
+                        'level': 'warning'
+                    })
             except Exception:
                 pass
         for logkeeper in self._logkeepers.itervalues():
