@@ -6,8 +6,8 @@
 def docker_registry = 'https://118864902010.dkr.ecr.us-east-1.amazonaws.com';
 def docker_registry_credential = 'ecr:us-east-1:AWSJenkins';
 def docker_util_image = 'getfinancing/libs/testsbase';
-def master_branch_name = 'master';
-def docker_allowed_branches = ['develop', master_branch_name];
+def master_branch_name = 'gfmaster';
+def docker_allowed_branches = ['develop', master_branch_name, 'feature/ci'];
 def current_date = new Date().format('yyyyMMddhhmmss');
 def should_build = true;
 def skip_steps = false;
@@ -45,6 +45,26 @@ pipeline {
              }
         }
 
+        stage('Security') {
+            when {
+                expression {
+                    !skip_steps && should_build
+                }
+            }
+            steps {
+                echo "Checking ${env.JOB_NAME} #${env.BUILD_ID}"
+                script {
+                    docker.withRegistry(docker_registry, docker_registry_credential) {
+                        docker.image(docker_util_image).inside(env.DOCKER_COMMAND) {
+                            sh 'cp sample.env .env'
+                            sh ". /py27; tox -e 'py27-security'"
+                            sh 'rm .env'
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Build') {
             when {
                 expression {
@@ -74,11 +94,11 @@ pipeline {
                     if (env.BRANCH_NAME == master_branch_name) {
                         sh "git tag v${release_version}"
                         sh "git checkout develop"
-                        sh "git merge master"
+                        sh "git merge ${master_branch_name}"
                         sshagent (credentials: ['JenkinsGitKey']) {
                             sh "git push develop --tags"
                         }
-                        sh "git checkout master"
+                        sh "git checkout ${master_branch_name}"
                     }
                 }
             }
