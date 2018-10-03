@@ -56,9 +56,7 @@ pipeline {
                 script {
                     docker.withRegistry(docker_registry, docker_registry_credential) {
                         docker.image(docker_util_image).inside(env.DOCKER_COMMAND) {
-                            sh 'cp sample.env .env'
                             sh ". /py27; tox -e 'py27-security'"
-                            sh 'rm .env'
                         }
                     }
                 }
