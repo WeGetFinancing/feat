@@ -7,7 +7,7 @@ def docker_registry = 'https://118864902010.dkr.ecr.us-east-1.amazonaws.com';
 def docker_registry_credential = 'ecr:us-east-1:AWSJenkins';
 def docker_util_image = 'getfinancing/libs/testsbase';
 def master_branch_name = 'gfmaster';
-def docker_allowed_branches = ['develop', master_branch_name, 'feature/ci'];
+def docker_allowed_branches = ['develop', master_branch_name];
 def current_date = new Date().format('yyyyMMddhhmmss');
 def should_build = true;
 def skip_steps = false;
@@ -127,6 +127,54 @@ pipeline {
         always {
             cleanWs()
         }
+        success {
+            notifyBuild(currentBuild.result);
+        }
+        failure {
+            notifyBuild(currentBuild.result);
+        }
     }
+
+}
+
+/*
+    Sniped copied from: https://www.cloudbees.com/blog/sending-notifications-pipeline
+ */
+
+def notifyBuild(String buildStatus = 'STARTED') {
+    // build status of null means successful
+    buildStatus = buildStatus ?: 'SUCCESSFUL'
+
+    // Default values
+    def recipientProviders = [[$class: 'DevelopersRecipientProvider']]
+    def colorName = 'RED'
+    def colorCode = '#FF0000'
+    def subject = "${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+    def summary = "${subject} (${env.BUILD_URL})"
+    def details = """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+    <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
+
+    // Override default values based on build status
+    if (buildStatus == 'STARTED') {
+        color = 'YELLOW'
+        colorCode = '#FFFF00'
+    } else if (buildStatus == 'SUCCESSFUL') {
+        color = 'GREEN'
+        colorCode = '#00FF00'
+    } else {
+        color = 'RED'
+        colorCode = '#FF0000'
+        recipientProviders = [[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']]
+    }
+
+    // Send notifications
+    slackSend(color: colorCode, message: summary)
+
+    emailext(
+            subject: "[Jenkins] ${subject}",
+            mimeType: 'text/html',
+            body: '''${JELLY_SCRIPT,template="html"}''',
+            recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+    )
 }
 
