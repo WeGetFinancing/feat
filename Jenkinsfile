@@ -92,6 +92,7 @@ pipeline {
                     echo "Pushed release: ${release_version}"
                     if (env.BRANCH_NAME == master_branch_name) {
                         sh "git tag v${release_version}"
+                        sh "git fetch"
                         sh "git checkout develop"
                         sh "git merge ${master_branch_name}"
                         sshagent (credentials: ['JenkinsGitKey']) {
