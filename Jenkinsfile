@@ -74,8 +74,9 @@ pipeline {
                 echo "Going to build ${env.JOB_NAME} #${env.BUILD_ID}"
                 script {
                     sh 'git config --global push.default simple'
-                    sh "git checkout ${env.BRANCH_NAME}"
                     sshagent (credentials: ['JenkinsGitKey']) {
+                        sh "git fetch"
+                        sh "git checkout ${env.BRANCH_NAME}"
                         sh "git pull"
                     }
                     docker.withRegistry(docker_registry, docker_registry_credential) {
