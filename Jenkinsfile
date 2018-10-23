@@ -75,6 +75,7 @@ pipeline {
                 script {
                     sh 'git config --global push.default simple'
                     sh "git checkout ${env.BRANCH_NAME}"
+                    sh "git pull ${env.BRANCH_NAME}"
                     docker.withRegistry(docker_registry, docker_registry_credential) {
                         docker.image(docker_util_image).inside(env.DOCKER_COMMAND) {
                             if (env.BRANCH_NAME == master_branch_name) {
