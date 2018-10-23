@@ -1,0 +1,6 @@
+raven==6.9.0
+zope.interface==4.5.0
+twisted==14.0.2
+pyOpenSSL==17.5.0 #is the last compatible version, was:17.3.0
+cryptography==2.3.1 #was: <2.0
+pycryptodome==3.6.6 #was: pycrypto==2.6

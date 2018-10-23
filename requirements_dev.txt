@@ -1,0 +1,9 @@
+# Packages for security
+safety
+piprot
+# Normal dep packages
+bumpversion==0.5.3
+wheel==0.32.1
+watchdog==0.9.0
+tox==3.5.2
+twine==1.12.1

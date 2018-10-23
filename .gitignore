@@ -18,3 +18,4 @@ conf/feat.ini
 /run/feat.pid
 *.iml
 .envrc
+.tox
