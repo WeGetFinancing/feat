@@ -74,7 +74,11 @@ pipeline {
                 echo "Going to build ${env.JOB_NAME} #${env.BUILD_ID}"
                 script {
                     sh 'git config --global push.default simple'
-                    sh "git checkout ${env.BRANCH_NAME}"
+                    sshagent (credentials: ['JenkinsGitKey']) {
+                        sh "git fetch"
+                        sh "git checkout ${env.BRANCH_NAME}"
+                        sh "git pull"
+                    }
                     docker.withRegistry(docker_registry, docker_registry_credential) {
                         docker.image(docker_util_image).inside(env.DOCKER_COMMAND) {
                             if (env.BRANCH_NAME == master_branch_name) {
@@ -92,12 +96,14 @@ pipeline {
                     echo "Pushed release: ${release_version}"
                     if (env.BRANCH_NAME == master_branch_name) {
                         sh "git tag v${release_version}"
-                        sh "git checkout develop"
-                        sh "git merge ${master_branch_name}"
                         sshagent (credentials: ['JenkinsGitKey']) {
+                            sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
+                            sh "git fetch"
+                            sh "git checkout develop"
+                            sh "git merge ${master_branch_name}"
                             sh "git push develop --tags"
+                            sh "git checkout ${master_branch_name}"
                         }
-                        sh "git checkout ${master_branch_name}"
                     }
                 }
             }
@@ -124,9 +130,9 @@ pipeline {
     }
 
     post {
-        always {
-            cleanWs()
-        }
+//        always {
+//            cleanWs()
+//        }
         success {
             notifyBuild(currentBuild.result);
         }
