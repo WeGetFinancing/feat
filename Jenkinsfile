@@ -124,9 +124,9 @@ pipeline {
     }
 
     post {
-        always {
+//        always {
 //            cleanWs()
-        }
+//        }
         success {
             notifyBuild(currentBuild.result);
         }
