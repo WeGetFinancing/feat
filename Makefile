@@ -146,6 +146,14 @@ rpm:    el6
 el6:    targz
 	mach -k -r c6l64 build feat.spec
 
+release: dist ##@build package and upload a release
+	twine upload -r getfinancing dist/*
+
+dist: clean ##@build builds source and wheel package
+	python setup.py sdist
+	python setup.py bdist_wheel
+	ls -l dist
+	#ln -s gfbase-${VERSION}.tar.gz dist/gfbase-latest.tar.gz
 
 bumpreset: ##@build Apply current sprint year.year_week as the packae version.
 	bumpversion --allow-dirty --new-version ${SPRINT_VERSION} minor
