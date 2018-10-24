@@ -101,6 +101,7 @@ pipeline {
                             sh "git fetch"
                             sh "git checkout develop"
                             sh "git checkout origin/${master_branch_name} setup.cfg setup.py"
+                            sh "git commit -a -m 'Deployment of version ${release_version}, build ${env.BUILD_ID} [ci skip]'"
                             sh "git merge ${master_branch_name}"
                             sh "git commit -a -m 'Deployment of version ${release_version}, build ${env.BUILD_ID} [ci skip]'"
                             sh "git push develop --tags"
