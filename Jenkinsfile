@@ -18,7 +18,8 @@ pipeline {
 
     environment {
         DOCKER_TAG = "${env.BRANCH_NAME == master_branch_name ? 'latest' : env.BRANCH_NAME}"
-        // If not in master branch, use develop for any other branches, as the utility image will not exists for those branches.
+        // If not in master branch, use develop for any other branches,
+        // as the utility image will not exists for those branches.
         UTIL_TAG = "${env.BRANCH_NAME == master_branch_name ? 'latest' : 'develop'}"
         SOFT_FAIL = "${env.BRANCH_NAME == master_branch_name ? '|| false' : '|| true'}"
         DOCKER_COMMAND = "-e HOME=/var/jenkins_home"
@@ -182,7 +183,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
             subject: "[Jenkins] ${subject}",
             mimeType: 'text/html',
             body: '''${JELLY_SCRIPT,template="html"}''',
-            recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            recipientProviders: recipientProviders
     )
 }
 

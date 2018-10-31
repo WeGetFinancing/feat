@@ -155,6 +155,14 @@ dist: clean ##@build builds source and wheel package
 	ls -l dist
 	#ln -s gfbase-${VERSION}.tar.gz dist/gfbase-latest.tar.gz
 
+bumpdev: ##@build Bump the dev version of the package, when package is not yet final.
+	bumpversion --allow-dirty dev
+	git diff
+
+bumprel: ##@build Bump version to create a new release in the current sprint.
+	bumpversion --allow-dirty patch
+	git diff
+
 bumpreset: ##@build Apply current sprint year.year_week as the packae version.
 	bumpversion --allow-dirty --new-version ${SPRINT_VERSION} minor
 	git diff
