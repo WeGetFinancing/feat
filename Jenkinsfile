@@ -127,6 +127,9 @@ pipeline {
                         }
                     }
                 }
+                dir('dist') {
+                    deleteDir();
+                }
             }
         }
 
