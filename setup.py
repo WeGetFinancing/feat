@@ -127,7 +127,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/GetFinancing/feat',
-    version='18.42.3.dev3',
+    version='18.42.3.dev4',
     zip_safe=False,
 )
 
