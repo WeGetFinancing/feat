@@ -64,7 +64,7 @@ description = 'Flumotion Asynchronous Autonomous Agent Toolkit'
 
 etc_prefix = 'etc'
 var_prefix = 'var'
-share_prefix = 'share'
+share_prefix = 'usr/share'
 usr_prefix = sys.prefix
 
 setup(
@@ -113,6 +113,7 @@ setup(
              'conf/private.key',
              'conf/public.key',
              'conf/tunneling.p12',
+             'conf/feat.ini.sample'
          ]
          ),
     ],
@@ -126,7 +127,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/GetFinancing/feat',
-    version='18.42.3.dev1',
+    version='18.42.3.dev3',
     zip_safe=False,
 )
 
