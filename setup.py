@@ -102,6 +102,7 @@ setup(
          glob('gateway/static/images/*.gif')),
         (os.path.join(share_prefix, 'python-feat', 'gateway', 'static', 'script'),
          glob('gateway/static/script/*.js')),
+        # YOU SHOULD NOT BE USING THOSE CERTS!
         (os.path.join(etc_prefix, 'feat'),
          [
              'conf/authorized_keys',
