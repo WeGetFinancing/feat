@@ -10,6 +10,7 @@ src/master.log
 src/standalone.log
 log/*
 *.pyc
+*.pyo
 feat.egg-info/
 conf/feat.ini
 *.log
