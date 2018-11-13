@@ -62,9 +62,7 @@ test_requirements = []
 
 description = 'Flumotion Asynchronous Autonomous Agent Toolkit'
 
-etc_prefix = 'etc'
-var_prefix = 'var'
-share_prefix = 'usr/share'
+var_prefix = '/var'
 usr_prefix = sys.prefix
 
 setup(
@@ -86,7 +84,7 @@ setup(
     license='GPL',
     install_requires=read_requirements(),
     long_description=readme,  # + '\n\n' + history,
-    # long_description_content_type="text/markdown",
+    long_description_content_type="text/markdown",
     include_package_data=True,
     keywords=['twisted', 'agent', 'framework'],
     name='feat',
@@ -97,13 +95,12 @@ setup(
         (os.path.join(var_prefix, 'lock', 'feat'), []),
         (os.path.join(var_prefix, 'log', 'feat'), []),
         (os.path.join(var_prefix, 'run', 'feat'), []),
-        (os.path.join(share_prefix, 'python-feat', 'gateway', 'static'), glob('gateway/static/*.css')),
-        (os.path.join(share_prefix, 'python-feat', 'gateway', 'static', 'images'),
+        (os.path.join('share', 'python-feat', 'gateway', 'static'), glob('gateway/static/*.css')),
+        (os.path.join('share', 'python-feat', 'gateway', 'static', 'images'),
          glob('gateway/static/images/*.gif')),
-        (os.path.join(share_prefix, 'python-feat', 'gateway', 'static', 'script'),
+        (os.path.join('share', 'python-feat', 'gateway', 'static', 'script'),
          glob('gateway/static/script/*.js')),
-        # YOU SHOULD NOT BE USING THOSE CERTS!
-        (os.path.join(etc_prefix, 'feat'),
+        (os.path.join('/etc', 'feat'),
          [
              'conf/authorized_keys',
              'conf/client.p12',
@@ -114,7 +111,6 @@ setup(
              'conf/private.key',
              'conf/public.key',
              'conf/tunneling.p12',
-             'conf/feat.ini.sample'
          ]
          ),
     ],
@@ -128,7 +124,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/GetFinancing/feat',
-    version='18.44',
+    version='18.42.1',
     zip_safe=False,
 )
 
