@@ -62,7 +62,9 @@ test_requirements = []
 
 description = 'Flumotion Asynchronous Autonomous Agent Toolkit'
 
-var_prefix = '/var'
+etc_prefix = 'etc'
+var_prefix = 'var'
+share_prefix = 'usr/share'
 usr_prefix = sys.prefix
 
 setup(
@@ -95,12 +97,12 @@ setup(
         (os.path.join(var_prefix, 'lock', 'feat'), []),
         (os.path.join(var_prefix, 'log', 'feat'), []),
         (os.path.join(var_prefix, 'run', 'feat'), []),
-        (os.path.join('share', 'python-feat', 'gateway', 'static'), glob('gateway/static/*.css')),
-        (os.path.join('share', 'python-feat', 'gateway', 'static', 'images'),
+        (os.path.join(share_prefix, 'python-feat', 'gateway', 'static'), glob('gateway/static/*.css')),
+        (os.path.join(share_prefix, 'python-feat', 'gateway', 'static', 'images'),
          glob('gateway/static/images/*.gif')),
-        (os.path.join('share', 'python-feat', 'gateway', 'static', 'script'),
+        (os.path.join(share_prefix, 'python-feat', 'gateway', 'static', 'script'),
          glob('gateway/static/script/*.js')),
-        (os.path.join('/etc', 'feat'),
+        (os.path.join(etc_prefix, 'feat'),
          [
              'conf/authorized_keys',
              'conf/client.p12',
