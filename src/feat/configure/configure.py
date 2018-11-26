@@ -46,3 +46,8 @@ lockdir = _config.lockdir
 confdir = _config.confdir
 gatewaydir = _config.gatewaydir
 socketdir = _config.socketdir
+
+if os.environ.has_key('FEAT_GATEWAYDIR'):
+    gatewaydir = os.environ['FEAT_GATEWAYDIR']
+if os.environ.has_key('FEAT_BINDIR'):
+    bindir = os.environ['FEAT_BINDIR']
