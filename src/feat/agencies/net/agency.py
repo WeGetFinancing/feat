@@ -260,6 +260,9 @@ class Agency(agency.Agency):
 
         signal.signal(signal.SIGUSR1, self._sigusr1_handler)
         signal.signal(signal.SIGUSR2, self._sigusr2_handler)
+        # Add signal handlers for SIGINT and SIGTERM
+        signal.signal(signal.SIGINT, self._sigusr2_handler)
+        signal.signal(signal.SIGTERM, self._sigusr2_handler)
 
         backends = []
         backends.append(self._initiate_messaging(self.config.msg))
