@@ -217,6 +217,7 @@ class CouchDB(httpclient.ConnectionPool):
         if https:
             sp = security.ClientPolicy(security.ClientContextFactory())
         else:
+            raise Exception("STOP STOP STOP HTTPS IS DISABLED!!!!!!")
             sp = None
 
         httpclient.ConnectionPool.__init__(
@@ -302,6 +303,9 @@ class Database(common.ConnectionManager, log.LogProxy, ChangeListener):
         # doc_id -> C{int} number of locks
         self._document_locks = dict()
         self._cache = Cache(desired_size=self.DESIRED_CACHE_SIZE)
+
+        if https is False:
+            raise Exception("STOP STOP STOP WARNING HTTPS IS DISABLED!!!!!!")
 
         self._configure(host, port, db_name, username, password,
                         https)
