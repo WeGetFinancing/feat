@@ -125,14 +125,14 @@ class Replications(view.JavascriptView):
 
 
 @defer.inlineCallbacks
-def configure_replicator_database(host, port, username=None, password=None):
+def configure_replicator_database(host, port, username=None, password=None, https=False):
     """
     Connects to dabatase, checks the version and creates the
     design document used by feat (if it doesn't exist).
 
     @returns: IDatabaseConnection bound to _replicator database
     """
-    database = driver.Database(host, port, '_replicator', username, password)
+    database = driver.Database(host, port, '_replicator', username, password, https)
     connection = database.get_connection()
     version = yield database.get_version()
     if version < (1, 1, 0):

@@ -214,6 +214,15 @@ class CouchDB(httpclient.ConnectionPool):
             self._auth_header = a.header_value
         else:
             self._auth_header = None
+
+        from getfinancing.config import Configuration
+        self._gfconfig = Configuration.instance()
+        if str(self._gfconfig.get('app.database.couchdb.ssl', False)).lower() == 'true':
+            if not https:
+                log.error("DBG",
+                          "Warning database SSL is False in passed cfg, but true in config.yml, forcing it to be True")
+                https = True
+
         if https:
             sp = security.ClientPolicy(security.ClientContextFactory())
         else:
@@ -225,6 +234,39 @@ class CouchDB(httpclient.ConnectionPool):
             security_policy=sp,
             logger=logger,
             enable_pipelineing=False)
+
+    @defer.inlineCallbacks
+    def request(self, method, location, headers=None, body=None, decoder=None,
+                outside_of_the_pool=False, dont_pipeline=False,
+                reset_retry=1):
+        try:
+            elb_cookie = self._gfconfig.get('elbcookie')
+            if elb_cookie is not None:
+                if headers is None:
+                    headers = {}
+                log.debug("DBG", "SET ALB AS: " + str(elb_cookie))
+                headers['Cookie'] = 'AWSALB=%s' % (elb_cookie,)
+
+            response = yield httpclient.ConnectionPool.request(
+                self, method, location, headers, body,
+                decoder, outside_of_the_pool, dont_pipeline,
+                reset_retry
+            )
+            old_elb_cookie = elb_cookie
+            cookies = response.headers.get('set-cookie', [])
+            for cookie in cookies:
+                if cookie.startswith("AWSALB"):
+                    elb_cookie = cookie.split(';')[0].split('=')[1]
+                    break
+            if elb_cookie is not None:
+                log.debug("DBG", "GOT ALB AS: " + str(elb_cookie))
+                if old_elb_cookie != elb_cookie:
+                    self._gfconfig.set('elbcookie', elb_cookie)
+            defer.returnValue(response)
+        except Exception as e:
+            import traceback
+            log.error("CouchDB", "Exception: %s" % (traceback.format_exc(),))
+            raise e
 
     def get(self, url, headers=dict(), **extra):
         self._set_auth(headers)
