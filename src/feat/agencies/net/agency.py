@@ -70,8 +70,6 @@ class Startup(agency.Startup):
 
         dbc = self.c.db
         assert isinstance(dbc, config.DbConfig), str(type(dbc))
-        if dbc.https == False:
-            raise Exception("Agency STARTUP FAILURE!!! BECAUSE SSL WAS FALSE. %s" % (dbc.host,))
         self._db = driver.Database(dbc.host, int(dbc.port), dbc.name,
                                    dbc.username, dbc.password,
                                    https=dbc.https)
