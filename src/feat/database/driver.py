@@ -244,7 +244,7 @@ class CouchDB(httpclient.ConnectionPool):
             if elb_cookie is not None:
                 if headers is None:
                     headers = {}
-                log.debug("DBG", "PREVIOUS ELB COOKIE IS: " + str(elb_cookie))
+                log.debug("DBG", "SET ALB AS: " + str(elb_cookie))
                 headers['Cookie'] = 'AWSALB=%s' % (elb_cookie,)
 
             response = yield httpclient.ConnectionPool.request(
@@ -252,19 +252,21 @@ class CouchDB(httpclient.ConnectionPool):
                 decoder, outside_of_the_pool, dont_pipeline,
                 reset_retry
             )
-            elb_cookie = None
+            old_elb_cookie = elb_cookie
             cookies = response.headers.get('set-cookie', [])
             for cookie in cookies:
                 if cookie.startswith("AWSALB"):
                     elb_cookie = cookie.split(';')[0].split('=')[1]
+                    break
             if elb_cookie is not None:
-                old_elb_cookie = self._gfconfig.get('elbcookie')
+                log.debug("DBG", "GOT ALB AS: " + str(elb_cookie))
                 if old_elb_cookie != elb_cookie:
                     self._gfconfig.set('elbcookie', elb_cookie)
             defer.returnValue(response)
-        except Exception:
+        except Exception as e:
             import traceback
             log.error("CouchDB", "Exception: %s" % (traceback.format_exc(),))
+            raise e
 
     def get(self, url, headers=dict(), **extra):
         self._set_auth(headers)
