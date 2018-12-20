@@ -39,6 +39,7 @@ class SentryReporter(object):
                 kwargs['tags']['sprint'] = releaseconfig.version_sprint
                 import pkg_resources
                 kwargs['tags']['feat'] = pkg_resources.get_distribution("feat").version
+                kwargs['tags']['profile'] = os.environ.get('PROFILE', 'none')
             except Exception:
                 pass
 
