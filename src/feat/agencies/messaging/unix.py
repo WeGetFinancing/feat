@@ -70,7 +70,7 @@ class Master(log.Logger, log.LogProxy, common.ConnectionManager,
         self.log("Master broker dispatches the message with key: %r", key)
         if key not in self._slaves:
             debug_message("X--M", message, "UNKNOWN KEY")
-            self.warning("Don't know what to do, with this message, the key "
+            self.debug("Don't know what to do, with this message, the key "
                          "is %r, slaves we know: %r",
                          key, self._slaves.keys())
         else:
