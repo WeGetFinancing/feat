@@ -96,16 +96,16 @@ class Startup(agency.Startup):
         reactor.addSystemEventTrigger('before', 'shutdown',
                                       self.friend.on_killed)
 
-        mc = self.c.manhole
-        assert isinstance(mc, config.ManholeConfig), str(type(mc))
-        ssh_port = int(mc.port) if mc.port is not None else None
-
-        self.friend._ssh = ssh.ListeningPort(self.friend,
-                                      ssh.commands_factory(self.friend),
-                                      public_key=mc.public_key,
-                                      private_key=mc.private_key,
-                                      authorized_keys=mc.authorized_keys,
-                                      port=ssh_port)
+        # mc = self.c.manhole
+        # assert isinstance(mc, config.ManholeConfig), str(type(mc))
+        # ssh_port = int(mc.port) if mc.port is not None else None
+        #
+        # self.friend._ssh = ssh.ListeningPort(self.friend,
+        #                               ssh.commands_factory(self.friend),
+        #                               public_key=mc.public_key,
+        #                               private_key=mc.private_key,
+        #                               authorized_keys=mc.authorized_keys,
+        #                               port=ssh_port)
 
         socket_path = self.c.agency.socket_path
         self.friend._broker = self.friend.broker_factory(self.friend,
@@ -185,7 +185,7 @@ class Agency(agency.Agency):
         self.config = config
         self._hostname = unicode(self.config.agency.full_hostname)
 
-        self._ssh = None
+        # self._ssh = None
         self._broker = None
         self._gateway = None
         self._snapshot_task = None
@@ -247,7 +247,7 @@ class Agency(agency.Agency):
         return defer.succeed(None)
 
     def on_become_master(self):
-        self._ssh.start_listening()
+        # self._ssh.start_listening()
         self._journaler.set_connection_strings(self.config.agency.journal)
         try:
             self._start_master_gateway()
@@ -265,8 +265,8 @@ class Agency(agency.Agency):
         signal.signal(signal.SIGTERM, self._sigusr2_handler)
 
         backends = []
-        backends.append(self._initiate_messaging(self.config.msg))
-        backends.append(self._initiate_tunneling(self.config.tunnel))
+        # backends.append(self._initiate_messaging(self.config.msg))
+        # backends.append(self._initiate_tunneling(self.config.tunnel))
         backends.append(unix.Master(self._broker))
         backends = filter(None, backends)
 
@@ -290,7 +290,7 @@ class Agency(agency.Agency):
 
     def on_become_slave(self):
         self.start_host_agent = False
-        self._ssh.stop_listening()
+        # self._ssh.stop_listening()
         writer = journaler.BrokerProxyWriter(self._broker)
         writer.initiate()
         self._journaler.configure_with(writer)
@@ -350,7 +350,7 @@ class Agency(agency.Agency):
 
         self._messaging.remove_backend('unix')
 
-        self._ssh.stop_listening()
+        # self._ssh.stop_listening()
         d = self._journaler.close(flush_writer=False)
         if self._gateway:
             d.addCallback(defer.drop_param, self._gateway.cleanup)
@@ -399,17 +399,17 @@ class Agency(agency.Agency):
 
     def _disconnect(self):
         self.debug('In agent._disconnect(), '
-                   'ssh: %r, gateway: %r, journaler: %r, '
-                   'database: %r, broker: %r', self._ssh, self._gateway,
+                   'gateway: %r, journaler: %r, '
+                   'database: %r, broker: %r', self._gateway,
                    self._journaler, self._database, self._broker)
         d = defer.succeed(None)
 
         handler = lambda msg: (1, error.handle_failure, self, msg)
-        if self._ssh:
-            d.addCallback(defer.drop_param, self._ssh.stop_listening)
-            d.addCallbacks(defer.drop_param, defer.inject_param,
-                           callbackArgs=(self.debug, "SSH stopped"),
-                           errbackArgs=handler("Failed stopping SSH"))
+        # if self._ssh:
+        #     d.addCallback(defer.drop_param, self._ssh.stop_listening)
+        #     d.addCallbacks(defer.drop_param, defer.inject_param,
+        #                    callbackArgs=(self.debug, "SSH stopped"),
+        #                    errbackArgs=handler("Failed stopping SSH"))
         if self._gateway:
             d.addCallback(defer.drop_param, self._gateway.cleanup)
             d.addCallbacks(defer.drop_param, defer.inject_param,
@@ -590,55 +590,55 @@ class Agency(agency.Agency):
         '''Give the reference to the nth slave agency.'''
         return self._broker.slaves[slave_id].reference
 
-    def _initiate_messaging(self, mconfig):
-        assert isinstance(mconfig, config.MsgConfig), str(type(mconfig))
-        try:
-            host = mconfig.host
-            port = int(mconfig.port)
-            username = mconfig.user
-            password = mconfig.password
-
-            self.info("Setting up messaging using %s@%s:%d", username,
-                      host, port)
-
-            backend = net.RabbitMQ(host, port, username, password)
-            client = rabbitmq.Client(backend, self.get_hostname())
-            return client
-        except Exception as e:
-            msg = "Failed to setup messaging backend"
-            error.handle_exception(self, e, msg)
-            # For now we do not support not having messaging backend
-            raise
-
-    def _initiate_tunneling(self, tconfig):
-        assert isinstance(tconfig, config.TunnelConfig), str(type(tconfig))
-        try:
-            host = tconfig.host
-            port = int(tconfig.port)
-            p12 = tconfig.p12
-            port_range = range(port, port + TUNNELING_PORT_COUNT)
-
-            self.info("Setting up tunneling on %s ports %d-%d "
-                      "using PKCS12 %r", host, port_range[0],
-                      port_range[-1], p12)
-
-            csec = security.ClientContextFactory(p12_filename=p12,
-                                                 verify_ca_from_p12=True)
-            cpol = security.ClientPolicy(csec)
-            ssec = security.ServerContextFactory(p12_filename=p12,
-                                                 verify_ca_from_p12=True,
-                                                 enforce_cert=True)
-            spol = security.ServerPolicy(ssec)
-            backend = tunneling.Backend(host, port_range,
-                                        client_security_policy=cpol,
-                                        server_security_policy=spol)
-            frontend = tunneling.Tunneling(backend)
-            return frontend
-
-        except Exception as e:
-            msg = "Failed to setup tunneling backend"
-            error.handle_exception(self, e, msg)
-        return None
+    # def _initiate_messaging(self, mconfig):
+    #     assert isinstance(mconfig, config.MsgConfig), str(type(mconfig))
+    #     try:
+    #         host = mconfig.host
+    #         port = int(mconfig.port)
+    #         username = mconfig.user
+    #         password = mconfig.password
+    #
+    #         self.info("Setting up messaging using %s@%s:%d", username,
+    #                   host, port)
+    #
+    #         backend = net.RabbitMQ(host, port, username, password)
+    #         client = rabbitmq.Client(backend, self.get_hostname())
+    #         return client
+    #     except Exception as e:
+    #         msg = "Failed to setup messaging backend"
+    #         error.handle_exception(self, e, msg)
+    #         # For now we do not support not having messaging backend
+    #         raise
+    #
+    # def _initiate_tunneling(self, tconfig):
+    #     assert isinstance(tconfig, config.TunnelConfig), str(type(tconfig))
+    #     try:
+    #         host = tconfig.host
+    #         port = int(tconfig.port)
+    #         p12 = tconfig.p12
+    #         port_range = range(port, port + TUNNELING_PORT_COUNT)
+    #
+    #         self.info("Setting up tunneling on %s ports %d-%d "
+    #                   "using PKCS12 %r", host, port_range[0],
+    #                   port_range[-1], p12)
+    #
+    #         csec = security.ClientContextFactory(p12_filename=p12,
+    #                                              verify_ca_from_p12=True)
+    #         cpol = security.ClientPolicy(csec)
+    #         ssec = security.ServerContextFactory(p12_filename=p12,
+    #                                              verify_ca_from_p12=True,
+    #                                              enforce_cert=True)
+    #         spol = security.ServerPolicy(ssec)
+    #         backend = tunneling.Backend(host, port_range,
+    #                                     client_security_policy=cpol,
+    #                                     server_security_policy=spol)
+    #         frontend = tunneling.Tunneling(backend)
+    #         return frontend
+    #
+    #     except Exception as e:
+    #         msg = "Failed to setup tunneling backend"
+    #         error.handle_exception(self, e, msg)
+    #     return None
 
     def _can_start_host_agent(self):
         if not self._broker.is_master():

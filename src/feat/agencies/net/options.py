@@ -42,7 +42,7 @@ DEFAULT_JOURFILE = "sqlite://" +\
 DEFAULT_GW_PORT = 5500
 DEFAULT_GW_P12_FILE = os.path.join(configure.confdir, "gateway.p12")
 DEFAULT_GW_CLIENT_P12_FILE = os.path.join(configure.confdir, "client.p12")
-DEFAULT_ALLOW_TCP_GATEWAY = False
+DEFAULT_ALLOW_TCP_GATEWAY = True
 
 DEFAULT_TUNNEL_PORT = 5400
 DEFAULT_TUNNEL_P12_FILE = os.path.join(configure.confdir, "tunneling.p12")
@@ -53,7 +53,7 @@ DEFAULT_MH_PRIVKEY = os.path.join(configure.confdir, "private.key")
 DEFAULT_MH_AUTH = os.path.join(configure.confdir, "authorized_keys")
 DEFAULT_MH_PORT = 2222
 
-DEFAULT_ENABLE_SPAWNING_SLAVE = True
+DEFAULT_ENABLE_SPAWNING_SLAVE = False
 DEFAULT_RUNDIR = configure.rundir
 DEFAULT_LOGDIR = configure.logdir
 DEFAULT_DAEMONIZE = False

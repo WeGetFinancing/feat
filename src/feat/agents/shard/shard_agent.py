@@ -141,11 +141,11 @@ class Partners(agent.Partners):
 
     partners.has_many('hosts', 'host_agent', HostPartner)
     partners.has_many('neighbours', 'shard_agent', ShardPartner)
-    partners.has_one('raage', 'raage_agent', RaagePartner)
-    partners.has_one('monitor', 'monitor_agent', MonitorPartner)
-    partners.has_one('alert', 'alert_agent', AlertPartner)
+    # partners.has_one('raage', 'raage_agent', RaagePartner)
+    # partners.has_one('monitor', 'monitor_agent', MonitorPartner)
+    # partners.has_one('alert', 'alert_agent', AlertPartner)
 
-    shard_structure = ['raage_agent', 'monitor_agent', 'alert_agent']
+    shard_structure = [] #['raage_agent', 'monitor_agent', 'alert_agent']
 
 
 class ShardAgentRole(enum.Enum):
