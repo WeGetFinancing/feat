@@ -201,6 +201,72 @@ def _solve_alert(connection, doc, conflicts):
 
 
 @defer.inlineCallbacks
+def _solve_db_brute_force(connection, doc, conflicts):
+    """
+    Solves conficts by a brute force merge between all conflictive documents.
+    This is due to conflicts due to direct access to DB by other processes.
+    :param connection:
+    :param doc:
+    :param conflicts:
+    :return:
+    """
+
+    def deep_merge(a, b, path=None):
+        """
+        By default python doesn't deep mix dictionaries.
+        This makes sure, we don't overwrite anything on the original dictionary.
+
+        FIXME: this merges dictionaries, but not arrays-->
+        https://pypi.python.org/pypi/jsonmerge
+
+        Copied from:
+        http://stackoverflow.com/questions/7204805/dictionaries-of-dictionaries-merge
+
+        :param a: original dictionary
+        :param b: changes to be applied
+        :param path:
+        :return: dictionary with deep merge
+        """
+        if path is None: path = []
+        for key in b:
+            if key in a:
+                if isinstance(a[key], dict) and isinstance(b[key], dict):
+                    # if dict traverse recursively
+                    a[key] = deep_merge(a[key], b[key], path + [str(key)])
+                else:
+                    a[key] = b[key]
+            else:
+                a[key] = b[key]  # new leaf
+        return a
+
+    try:
+        defers = list()
+
+        for rev in conflicts:
+            d = connection.delete_document({'_id': doc.doc_id, '_rev': rev})
+            d.addErrback(Failure.trap, NotFoundError)
+            defers.append(d)
+
+            fetched = yield connection.get_document(doc.doc_id, rev=rev)
+            if doc.compare_content(fetched):
+                continue
+            connection.warning("Solving conflict using the brute force method. doc_id: %s", doc.doc_id)
+            connection.debug("type of document: %s", str(type(doc)))
+            connection.debug("type of document: %s", str(type(fetched)))
+            # Create solution document
+
+            latest = doc.snapshot()
+            conflicted = fetched.snapshot()
+            solution = deep_merge(conflicted, latest)
+            doc.recover(solution)
+        yield connection.save_document(doc)
+        yield defer.DeferredList(defers, consumeErrors=True)
+
+    except Exception as e:
+        import traceback
+        connection.error("Traceback applying brute force resolution to document: %s", traceback.format_exc())
+
+@defer.inlineCallbacks
 def _solve_merge(connection, doc, conflicts):
     # First check for the situation when no merge is actually needed.
     # This happens when the body of the conflicting documents is the same
@@ -232,8 +298,9 @@ def _solve_merge(connection, doc, conflicts):
     root_rev = _find_common_ancestor(lookup, [doc.rev] + conflicts)
     if not root_rev:
         #raise UnsolvableConflict("Failed to find common ancestor", doc)
-        connection.warning("Failed to find common ancestor, maybe history was lost, thus I will apply the db_winner strategy. doc_id: %s", doc.doc_id)
-        yield _solve_db_winner(connection, doc, conflicts)
+        connection.warning("Failed to find common ancestor. Will apply FORCE BRUTE. doc_id: %s", doc.doc_id)
+        yield _solve_db_brute_force(connection, doc, conflicts)
+        # yield _solve_db_winner(connection, doc, conflicts)
         return
 
     try:
