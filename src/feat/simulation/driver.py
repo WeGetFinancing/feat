@@ -82,7 +82,7 @@ class Commands(manhole.Manhole):
         msg = rabbitmq.Client(self._messaging, queue_name)
         tun = tunneling.Tunneling(tun_backend)
 
-        d = ag.initiate(self._database, self._journaler, self, ip, hostname,
+        d = ag.initiate(self._database, None, self, ip, hostname,
                         start_host, msg, tun)
         d.addCallback(defer.override_result, ag)
         d.addCallback(defer.bridge_param, self.wait_for_idle)
@@ -218,8 +218,8 @@ class Driver(log.Logger, log.LogProxy, Commands):
         if jourfile:
             jouropts['filename'] = jourfile
             jouropts['encoding'] = 'zip'
-        self._jourwriter = journaler.SqliteWriter(self, **jouropts)
-        self._journaler = journaler.Journaler()
+        # self._jourwriter = journaler.SqliteWriter(self, **jouropts)
+        # self._journaler = journaler.Journaler()
 
         self._output = Output()
         self._parser = manhole.Parser(self, self._output, self,
@@ -241,9 +241,10 @@ class Driver(log.Logger, log.LogProxy, Commands):
     def initiate(self):
         self._database_connection = self._database.get_connection()
         d1 = tools.push_initial_data(self._database_connection)
-        d2 = self._jourwriter.initiate()
-        self._journaler.configure_with(self._jourwriter)
-        return defer.DeferredList([d1, d2])
+        # d2 = self._jourwriter.initiate()
+        # self._journaler.configure_with(self._jourwriter)
+        # return defer.DeferredList([d1, d2])
+        return defer.DeferredList([d1])
 
     def get_local(self, name):
         return self._parser.get_local(name)
@@ -296,9 +297,9 @@ class Driver(log.Logger, log.LogProxy, Commands):
             d.addCallback(defer.drop_param, x._kill_all_protocols)
         return d
 
-    def snapshot_all_agents(self):
-        for medium in self.iter_agents():
-            medium.check_if_should_snapshot(force=True)
+    # def snapshot_all_agents(self):
+    #     for medium in self.iter_agents():
+    #         medium.check_if_should_snapshot(force=True)
 
     @defer.inlineCallbacks
     def destroy(self):
@@ -309,9 +310,9 @@ class Driver(log.Logger, log.LogProxy, Commands):
         for x in self.iter_agents():
             defers.append(x.terminate_hard())
         yield defer.DeferredList(defers)
-        yield self._journaler.close()
-        del(self._journaler)
-        del(self._jourwriter)
+        # yield self._journaler.close()
+        # del(self._journaler)
+        # del(self._jourwriter)
         del(self._messaging)
         del(self._tunneling_bridge)
         del(self._database)

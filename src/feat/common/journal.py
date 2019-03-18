@@ -352,14 +352,14 @@ class Recorder(RecorderNode, annotate.Annotable):
             fiber_first = section_first and section.descriptor.fiber_depth == 0
             fun_id, function = self._resolve_function(fun_id, function)
 
-            if section_first:
-                entry = self.journal_keeper.new_entry(self.journal_id, fun_id,
-                                                      *args, **kwargs)
-                entry.set_fiber_context(fibdesc.fiber_id, fibdesc.fiber_depth)
-
-                section.state[RECORDING_TAG] = True
-                section.state[RECMODE_TAG] = JournalMode.recording
-                section.state[JOURNAL_ENTRY_TAG] = entry
+            # if section_first:
+            #     entry = self.journal_keeper.new_entry(self.journal_id, fun_id,
+            #                                           *args, **kwargs)
+            #     entry.set_fiber_context(fibdesc.fiber_id, fibdesc.fiber_depth)
+            #
+            #     section.state[RECORDING_TAG] = True
+            #     section.state[RECMODE_TAG] = JournalMode.recording
+            #     section.state[JOURNAL_ENTRY_TAG] = entry
 
             if not (fiber_first or reentrant):
                 # If not reentrant and it is not the first, it's BAAAAAD.
@@ -378,8 +378,8 @@ class Recorder(RecorderNode, annotate.Annotable):
         except failure.Failure as f:
             # When trapping a failure it raised itself
 
-            if not section_first:
-                raise
+            # if not section_first:
+            #     raise
 
             result = fiber.fail(f.value)
             error.handle_failure(self, f, "Failure inside recorded "
@@ -387,22 +387,22 @@ class Recorder(RecorderNode, annotate.Annotable):
 
         except Exception as e:
 
-            if not section_first:
-                raise
+            # if not section_first:
+            #     raise
 
             result = fiber.fail(e)
             error.handle_exception(self, e, "Exception inside recorded "
                                    "function %s", fun_id)
 
-        finally:
-
-            if section_first:
-                entry.set_result(result)
-                entry.commit()
-                result = entry.get_result()
-                section.state[RECORDING_TAG] = None
-                section.state[JOURNAL_ENTRY_TAG] = None
-                section.state[RECMODE_TAG] = None
+        # finally:
+        #
+        #     if section_first:
+        #         entry.set_result(result)
+        #         entry.commit()
+        #         result = entry.get_result()
+        #         section.state[RECORDING_TAG] = None
+        #         section.state[JOURNAL_ENTRY_TAG] = None
+        #         section.state[RECMODE_TAG] = None
 
         return section.exit(result)
 

@@ -107,7 +107,7 @@ class MetaAgent(type(replay.Replayable), type(manhole.Manhole)):
 
 class BaseAgent(mro.FiberMroMixin, log.Logger, log.LogProxy, replay.Replayable,
                 manhole.Manhole, rpc.AgentMixin,
-                dependency.AgentDependencyMixin, monitor.AgentMixin,
+                dependency.AgentDependencyMixin,  # monitor.AgentMixin,
                 alert.AgentMixin):
 
     __metaclass__ = MetaAgent

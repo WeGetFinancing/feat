@@ -161,8 +161,8 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
         d.addCallback(setter, '_configuration')
         d.addCallback(defer.drop_param,
                       self.join_shard, self._descriptor.shard)
-        d.addCallback(defer.drop_param,
-                      self.journal_agent_created)
+        # d.addCallback(defer.drop_param,
+        #               self.journal_agent_created)
         d.addCallback(defer.drop_param,
                       self._call_initiate, **kwargs)
         d.addCallback(defer.drop_param, self.call_next, self._call_startup,
@@ -209,31 +209,32 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
         protocols = [i.get_agent_side() for i in self._protocols.values()]
         return (self.agent, protocols, )
 
-    def journal_agent_created(self):
-        factory = type(self.agent)
-        self.agency.journal_agent_created(
-            self._descriptor.doc_id, self._instance_id,
-            factory, self.snapshot())
+    # def journal_agent_created(self):
+    #     factory = type(self.agent)
+    #     self.agency.journal_agent_created(
+    #         self._descriptor.doc_id, self._instance_id,
+    #         factory, self.snapshot())
 
-    def check_if_should_snapshot(self, force=False):
-        if force or self._entries_since_snapshot > MIN_ENTRIES_PER_SNAPSHOT:
-            self.journal_snapshot()
-        else:
-            self.log('Skipping snapshot, number of entries %d < %d',
-                     self._entries_since_snapshot, MIN_ENTRIES_PER_SNAPSHOT)
+    # def check_if_should_snapshot(self, force=False):
+    #     return
+    #     # if force or self._entries_since_snapshot > MIN_ENTRIES_PER_SNAPSHOT:
+    #     #     self.journal_snapshot()
+    #     # else:
+    #     #     self.log('Skipping snapshot, number of entries %d < %d',
+    #     #              self._entries_since_snapshot, MIN_ENTRIES_PER_SNAPSHOT)
 
-    def journal_snapshot(self):
-        # Remove all the entries for the agent from  the registry,
-        # so that snapshot contains full objects not just the references
-        agent_id = self._descriptor.doc_id
-        self._entries_since_snapshot = 0
-        self.agency.journal_agent_snapshot(
-            agent_id, self._instance_id, self.snapshot_agent())
+    # def journal_snapshot(self):
+    #     # Remove all the entries for the agent from  the registry,
+    #     # so that snapshot contains full objects not just the references
+    #     agent_id = self._descriptor.doc_id
+    #     self._entries_since_snapshot = 0
+    #     self.agency.journal_agent_snapshot(
+    #         agent_id, self._instance_id, self.snapshot_agent())
 
-    def journal_protocol_created(self, *args, **kwargs):
-        self.agency.journal_protocol_created(self._descriptor.doc_id,
-                                             self._instance_id,
-                                             *args, **kwargs)
+    # def journal_protocol_created(self, *args, **kwargs):
+    #     self.agency.journal_protocol_created(self._descriptor.doc_id,
+    #                                          self._instance_id,
+    #                                          *args, **kwargs)
 
     @serialization.freeze_tag('AgencyAgent.check_if_hosted')
     def check_if_hosted(self, agent_id):
@@ -388,10 +389,10 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
         done = medium.notify_finish()
         done.addErrback(Failure.trap, ProtocolFailed)
 
-        if IAgencyProtocolInternal.providedBy(medium):
-            self.register_protocol(medium)
-            self.journal_protocol_created(factory, medium, args, kwargs)
-            done.addBoth(defer.drop_param, self.unregister_protocol, medium)
+        # if IAgencyProtocolInternal.providedBy(medium):
+        #     self.register_protocol(medium)
+        #     # self.journal_protocol_created(factory, medium, args, kwargs)
+        #     done.addBoth(defer.drop_param, self.unregister_protocol, medium)
 
         if ILongRunningProtocol.providedBy(medium):
             # This interface is implemented by the simpler protocols
@@ -526,12 +527,12 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
     def register(self, recorder):
         self.agency.register(recorder)
 
-    def new_entry(self, journal_id, function_id, *args, **kwargs):
-        self._entries_since_snapshot += 1
-        return self.agency.journal_new_entry(self._descriptor.doc_id,
-                                             self._instance_id,
-                                             journal_id, function_id,
-                                             *args, **kwargs)
+    # def new_entry(self, journal_id, function_id, *args, **kwargs):
+    #     self._entries_since_snapshot += 1
+    #     return self.agency.journal_new_entry(self._descriptor.doc_id,
+    #                                          self._instance_id,
+    #                                          journal_id, function_id,
+    #                                          *args, **kwargs)
 
     ### ISerializable Methods ###
 
@@ -566,9 +567,9 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
         if protocol.guid in self._protocols:
             self.log('Unregistering protocol guid: %r', protocol.guid)
             protocol = self._protocols[protocol.guid]
-            self.agency.journal_protocol_deleted(
-                self._descriptor.doc_id, self._instance_id,
-                protocol.get_agent_side(), protocol.snapshot())
+            # self.agency.journal_protocol_deleted(
+            #     self._descriptor.doc_id, self._instance_id,
+            #     protocol.get_agent_side(), protocol.snapshot())
             del self._protocols[protocol.guid]
         else:
             self.error('Tried to unregister protocol with guid: %r, '
@@ -815,7 +816,7 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
         self._set_state(AgencyAgentState.terminating)
 
         self.log('Begging termination procedure, storing snapshot.')
-        self.check_if_should_snapshot(force=True)
+        # self.check_if_should_snapshot(force=True)
 
         d = defer.succeed(None)
 
@@ -862,8 +863,8 @@ class AgencyAgent(log.LogProxy, log.Logger, manhole.Manhole,
         error.handle_failure(self, failure, "Failure during termination")
 
     def _unregister_from_agency(self):
-        self.agency.journal_agent_deleted(self._descriptor.doc_id,
-                                          self._instance_id)
+        # self.agency.journal_agent_deleted(self._descriptor.doc_id,
+        #                                   self._instance_id)
         self.agency.unregister_agent(self)
 
     def _cancel_long_running_protocols(self):
@@ -1008,14 +1009,15 @@ class Startup(common.Procedure):
         self._backends = self.opts.get('backends', [])
         self._messaging = self.opts.get('messaging',
                                         messaging.Messaging(self.friend))
-        self._journaler = self.opts.get('journaler', None)
+        # self._journaler = self.opts.get('journaler', None)
 
     def stage_journaler(self):
-        if self._journaler is None:
-            return
-
-        self.friend._journaler = IJournaler(self._journaler)
-        self.friend._jourconn = self._journaler.get_connection(self.friend)
+        return
+        # if self._journaler is None:
+        #     return
+        #
+        # self.friend._journaler = IJournaler(self._journaler)
+        # self.friend._jourconn = self._journaler.get_connection(self.friend)
 
     def stage_messaging(self):
         self.friend._messaging = self._messaging
@@ -1068,9 +1070,9 @@ class Agency(log.LogProxy, log.Logger, manhole.Manhole,
 
         self.registry = weakref.WeakValueDictionary()
         # IJournaler
-        self._journaler = None
+        # self._journaler = None
         # IJournalerConnection
-        self._jourconn = None
+        # self._jourconn = None
         # IDbConnectionFactory
         self._database = None
 
@@ -1255,54 +1257,54 @@ class Agency(log.LogProxy, log.Logger, manhole.Manhole,
                 % (j_id, self.registry[j_id], ))
         self.registry[j_id] = recorder
 
-    def journal_new_entry(self, agent_id, instance_id, journal_id,
-                          function_id, *args, **kwargs):
-        return self._jourconn.new_entry(agent_id, instance_id, journal_id,
-                                         function_id, *args, **kwargs)
+    # def journal_new_entry(self, agent_id, instance_id, journal_id,
+    #                       function_id, *args, **kwargs):
+    #     return self._jourconn.new_entry(agent_id, instance_id, journal_id,
+    #                                      function_id, *args, **kwargs)
 
-    def journal_agency_entry(self, agent_id, instance_id, function_id,
-                             *args, **kwargs):
-        if journal.add_effect(function_id, *args, **kwargs):
-            return
+    # def journal_agency_entry(self, agent_id, instance_id, function_id,
+    #                          *args, **kwargs):
+    #     if journal.add_effect(function_id, *args, **kwargs):
+    #         return
+    #
+    #     section = fiber.WovenSection()
+    #     section.enter()
+    #
+    #     try:
+    #
+    #         desc = section.descriptor
+    #         entry = self.journal_new_entry(agent_id, instance_id, 'agency',
+    #                                        function_id, *args, **kwargs)
+    #         entry.set_fiber_context(desc.fiber_id, desc.fiber_depth)
+    #         entry.set_result(None)
+    #         entry.commit()
+    #
+    #     finally:
+    #
+    #         section.abort()
 
-        section = fiber.WovenSection()
-        section.enter()
+    # def journal_protocol_created(self, agent_id, instance_id, protocol_factory,
+    #                              medium, *args, **kwargs):
+    #     self.journal_agency_entry(agent_id, instance_id, 'protocol_created',
+    #                               protocol_factory, medium, *args, **kwargs)
 
-        try:
+    # def journal_protocol_deleted(self, agent_id, instance_id,
+    #                              protocol_instance, dummy_id):
+    #     self.journal_agency_entry(agent_id, instance_id, 'protocol_deleted',
+    #                               protocol_instance.journal_id, dummy_id)
 
-            desc = section.descriptor
-            entry = self.journal_new_entry(agent_id, instance_id, 'agency',
-                                           function_id, *args, **kwargs)
-            entry.set_fiber_context(desc.fiber_id, desc.fiber_depth)
-            entry.set_result(None)
-            entry.commit()
+    # def journal_agent_created(self, agent_id, instance_id, agent_factory,
+    #                           dummy_id):
+    #     self.journal_agency_entry(agent_id, instance_id, 'agent_created',
+    #                               agent_factory, dummy_id)
 
-        finally:
+    # def journal_agent_deleted(self, agent_id, instance_id):
+    #     self.journal_agency_entry(agent_id, instance_id, 'agent_deleted')
 
-            section.abort()
-
-    def journal_protocol_created(self, agent_id, instance_id, protocol_factory,
-                                 medium, *args, **kwargs):
-        self.journal_agency_entry(agent_id, instance_id, 'protocol_created',
-                                  protocol_factory, medium, *args, **kwargs)
-
-    def journal_protocol_deleted(self, agent_id, instance_id,
-                                 protocol_instance, dummy_id):
-        self.journal_agency_entry(agent_id, instance_id, 'protocol_deleted',
-                                  protocol_instance.journal_id, dummy_id)
-
-    def journal_agent_created(self, agent_id, instance_id, agent_factory,
-                              dummy_id):
-        self.journal_agency_entry(agent_id, instance_id, 'agent_created',
-                                  agent_factory, dummy_id)
-
-    def journal_agent_deleted(self, agent_id, instance_id):
-        self.journal_agency_entry(agent_id, instance_id, 'agent_deleted')
-
-    def journal_agent_snapshot(self, agent_id, instance_id, snapshot):
-        self.log("Storing agents snapshot. Agent_id: %r, Instance_id: %r.",
-                 agent_id, instance_id)
-        self._jourconn.snapshot(agent_id, instance_id, snapshot)
+    # def journal_agent_snapshot(self, agent_id, instance_id, snapshot):
+    #     self.log("Storing agents snapshot. Agent_id: %r, Instance_id: %r.",
+    #              agent_id, instance_id)
+    #     self._jourconn.snapshot(agent_id, instance_id, snapshot)
 
     ### IExternalizer Methods ###
 
@@ -1335,12 +1337,12 @@ class Agency(log.LogProxy, log.Logger, manhole.Manhole,
                        if x._descriptor.doc_id == agent_id)
         return defer.succeed(result)
 
-    @manhole.expose()
-    def snapshot_agents(self, force=False):
-        '''snapshot agents if number of entries from last snapshot if greater
-        than 1000. Use force=True to override.'''
-        for agent in self._agents:
-            agent.check_if_should_snapshot(force)
+    # @manhole.expose()
+    # def snapshot_agents(self, force=False):
+    #     '''snapshot agents if number of entries from last snapshot if greater
+    #     than 1000. Use force=True to override.'''
+    #     for agent in self._agents:
+    #         agent.check_if_should_snapshot(force)
 
     @manhole.expose()
     def list_agents(self):

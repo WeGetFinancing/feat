@@ -233,8 +233,8 @@ class DialogInterest(BaseInterest):
                                 *self.args, **self.kwargs)
         medium.initiate()
         self.agency_agent.register_protocol(medium)
-        self.agency_agent.journal_protocol_created(self.agent_factory, medium,
-                                                   *self.args, **self.kwargs)
+        # self.agency_agent.journal_protocol_created(self.agent_factory, medium,
+        #                                            *self.args, **self.kwargs)
         d = medium.notify_finish()
         d.addBoth(defer.drop_param,
                   self._message_processed, message)
