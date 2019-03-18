@@ -24,8 +24,12 @@ class SentryReporter(object):
                     'partner',
                     'getfinancing'
                 ],
+                'ignore_exceptions': [
+                    '_DefGen_Return',
+                ],
                 'release': os.environ.get('APP_RELEASE', '1.0'),
-                'environment': os.environ.get('APP_ENV', 'test')
+                'environment': os.environ.get('APP_ENV', 'test'),
+                'tags': {}
             }
 
             try:
@@ -39,10 +43,33 @@ class SentryReporter(object):
                 kwargs['tags']['sprint'] = releaseconfig.version_sprint
                 import pkg_resources
                 kwargs['tags']['feat'] = pkg_resources.get_distribution("feat").version
+                kwargs['tags']['profile'] = os.environ.get('PROFILE', 'none')
             except Exception:
                 pass
 
+            kwargs['tags'].update(self._get_AWS_tags())
+
             self.client = Client(**kwargs)
+
+    def _get_AWS_tags(self):
+        kwargs = {}
+        try:
+            path = os.environ.get('ECS_CONTAINER_METADATA_FILE')
+            if path is None:
+                kwargs['cloud'] = 'local'
+            else:
+                kwargs['cloud'] = 'aws'
+                with file(path) as f:
+                    import json
+                    meta = json.loads(f.read())
+                    for key in (
+                            'ContainerName', 'ImageName', 'TaskARN', 'TaskDefinitionFamily', 'TaskDefinitionRevision',
+                            'Cluster', 'ImageID'):
+                        kwargs[key] = meta.get(key)
+        except Exception:
+            import traceback
+            print traceback.format_exc()
+        return kwargs
 
     def get_client(self):
         if _raven_imported:

@@ -662,6 +662,8 @@ def append_location(url, location):
 
 
 def compose(path=None, query=None, host=None, port=None, scheme=None):
+    # Force relative URL's. Thomas what you were thinking about?
+    host = None
     if host is None:
         # Relative url
         path = path if path is not None else ""
