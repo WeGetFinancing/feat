@@ -414,20 +414,20 @@ class BaseProtocol(log.Logger, basic.LineReceiver, timeout.Mixin):
     ### private ###
 
     def _on_firstline_timeout(self):
-        self.warning("First line timeout")
+        self.info("First line timeout")
         self._body_decoder = None
         self.process_timeout()
 
     def _on_headers_timeout(self):
-        self.warning("Headers timeout")
+        self.info("Headers timeout")
         self.process_timeout()
 
     def _on_inactivity_timeout(self):
-        self.warning("Inactivity timeout")
+        self.info("Inactivity timeout")
         self.process_timeout()
 
     def _on_idle_timeout(self):
-        self.warning("Idle timeout")
+        self.info("Idle timeout")
         self.process_timeout()
 
     def _reset(self):
