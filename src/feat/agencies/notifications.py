@@ -135,8 +135,8 @@ class AgencyCollectorInterest(protocols.BaseInterest):
         medium = AgencyCollector(self.agency_agent, self.agent_factory,
                                  *args, **kwargs)
         self.agency_agent.register_protocol(medium)
-        self.agency_agent.journal_protocol_created(self.agent_factory, medium,
-                                                   *args, **kwargs)
+        # self.agency_agent.journal_protocol_created(self.agent_factory, medium,
+        #                                            *args, **kwargs)
         medium.initiate()
 
         self.agency_collector = medium

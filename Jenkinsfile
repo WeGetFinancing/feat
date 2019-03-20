@@ -65,7 +65,7 @@ pipeline {
         }
 
 
-        stage('Build') {
+        stage('Build Library') {
             when {
                 expression {
                     should_build && env.BRANCH_NAME in docker_allowed_branches
@@ -101,6 +101,7 @@ pipeline {
                             sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                             sh "git fetch"
                             sh "git checkout develop"
+                            sh "git pull"
                             sh "git checkout origin/${master_branch_name} setup.cfg setup.py"
                             sh "git commit -a -m 'Deployment of version ${release_version}, build ${env.BUILD_ID} [ci skip]'"
                             sh "git merge ${master_branch_name}"
@@ -112,7 +113,7 @@ pipeline {
             }
         }
 
-        stage('Publish') {
+        stage('Publish Library') {
             when {
                 expression {
                     should_build && env.BRANCH_NAME in docker_allowed_branches
@@ -127,6 +128,7 @@ pipeline {
                         }
                     }
                 }
+                slackSend(color: "#0000FF0", message: "Congratulations! I have published ${env.JOB_NAME} #${env.BUILD_ID} v${release_version} within the pip repository. Enjoy the new release!")
                 dir('dist') {
                     deleteDir();
                 }

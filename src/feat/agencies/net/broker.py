@@ -472,11 +472,12 @@ class Broker(log.Logger, log.LogProxy, common.StateMachineMixin,
 
     @manhole.expose()
     def get_journaler(self):
-        self._ensure_connected()
-        if self.is_master():
-            return self.agency._journaler
-        elif self.is_slave():
-            return self._master.callRemote('get_journaler')
+        return None
+        # self._ensure_connected()
+        # if self.is_master():
+        #     return self.agency._journaler
+        # elif self.is_slave():
+        #     return self._master.callRemote('get_journaler')
 
     def iter_agency_ids(self):
         self._ensure_connected()
