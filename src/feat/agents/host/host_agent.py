@@ -523,9 +523,9 @@ class StartAgent(task.BaseTask):
                   "establishing partnership in the broken execution chain.",
                   state.descriptor.type_name, recp.key)
 
-        state.agent.call_next(state.agent.establish_partnership,
-                              recp, state.allocation_id, our_role=u'host',
-                              allow_double=True, static_name=state.static_name)
+        # state.agent.call_next(state.agent.establish_partnership,
+        #                       recp, state.allocation_id, our_role=u'host',
+        #                       allow_double=True, static_name=state.static_name)
         return recp
 
     @replay.mutable
