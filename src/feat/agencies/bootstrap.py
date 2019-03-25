@@ -112,7 +112,7 @@ def bootstrap(parser=None, args=None, descriptors=None):
     # The purpose of having log buffer here, is to be able to dump the
     # log lines to a journal after establishing connection with it.
     # This is done in stage_configure() of net agency Startup procedure.
-    tee.add_keeper('buffer', log.LogBuffer(limit=10000))
+    # tee.add_keeper('buffer', log.LogBuffer(limit=10000))
 
     # use the resolver from twisted.names instead of the default
     # the reason for this is that ThreadedResolver behaves strangely

@@ -176,3 +176,4 @@ version: ##@build Show current version
 	@echo "Previous sprint was: ${PREVIOUS_SPRINT_VERSION}"
 	@echo "New sprint is: ${SPRINT_VERSION}"
 	@echo "Type make bumpreset to set current sprint or make bumpresetpre to set previous sprint version"
+	@gfversion gfbase gfdba feat

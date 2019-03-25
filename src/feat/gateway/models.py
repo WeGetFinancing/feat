@@ -379,10 +379,10 @@ class Agency(model.Model):
                 label="Agency's Agents",
                 desc="Agents running on this agency.")
 
-    model.child("journaler",
-                source=getter.source_attr('_journaler'),
-                model='feat.agency.journaler',
-                label='Journaler')
+    # model.child("journaler",
+    #             source=getter.source_attr('_journaler'),
+    #             model='feat.agency.journaler',
+    #             label='Journaler')
 
     model.child('database',
                 source=getter.source_attr('_database'),

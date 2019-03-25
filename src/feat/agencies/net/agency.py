@@ -33,7 +33,7 @@ from feat.agents.base import replay
 
 from feat.configure import configure
 from feat import applications
-from feat.common import log, defer, time, error, run, signal
+from feat.common import log, defer, time, error, run, signal, fiber
 from feat.common import manhole, text_helper, serialization
 
 from feat.process import standalone
@@ -73,24 +73,24 @@ class Startup(agency.Startup):
         self._db = driver.Database(dbc.host, int(dbc.port), dbc.name,
                                    dbc.username, dbc.password,
                                    https=dbc.https)
-        self._journaler = journaler.Journaler(
-            on_rotate_cb=self.friend._force_snapshot_agents,
-            on_switch_writer_cb=self.friend._on_journal_writer_switch,
-            hostname=self.friend.get_hostname())
+        # self._journaler = journaler.Journaler(
+        #     on_rotate_cb=self.friend._force_snapshot_agents,
+        #     on_switch_writer_cb=self.friend._on_journal_writer_switch,
+        #     hostname=self.friend.get_hostname())
         # add the journaler to the LogTee which is the default keeper
         # dump the buffer with entries so far and remove it from the tee
         # at this point in future if we decide not to log to text files
         # we should remove the 'flulog' keeper from the tee as well
-        tee = log.get_default()
-        # FIXME: get_keeper is not an ILogWhatever method, only Tee has it
-        try:
-            buff = tee.get_keeper('buffer')
-            buff.dump(self._journaler)
-            buff.clean()
-            tee.remove_keeper('buffer')
-            tee.add_keeper('journaler', self._journaler)
-        except AttributeError:
-            self.warning('Programmer error, interface disrespect')
+        # tee = log.get_default()
+        # # FIXME: get_keeper is not an ILogWhatever method, only Tee has it
+        # try:
+        #     buff = tee.get_keeper('buffer')
+        #     buff.dump(self._journaler)
+        #     buff.clean()
+        #     tee.remove_keeper('buffer')
+        #     tee.add_keeper('journaler', self._journaler)
+        # except AttributeError:
+        #     self.warning('Programmer error, interface disrespect')
 
     def stage_private(self):
         reactor.addSystemEventTrigger('before', 'shutdown',
@@ -134,11 +134,11 @@ class Shutdown(agency.Shutdown):
         self.friend._cancel_snapshoter()
 
     def stage_internals(self):
-        tee = log.get_default()
-        try:
-            tee.remove_keeper('journaler')
-        except KeyError:
-            pass
+        # tee = log.get_default()
+        # try:
+        #     tee.remove_keeper('journaler')
+        # except KeyError:
+        #     pass
         return self.friend._disconnect()
 
     def stage_process(self):
@@ -248,7 +248,7 @@ class Agency(agency.Agency):
 
     def on_become_master(self):
         # self._ssh.start_listening()
-        self._journaler.set_connection_strings(self.config.agency.journal)
+        # self._journaler.set_connection_strings(self.config.agency.journal)
         try:
             self._start_master_gateway()
         except Exception as e:
@@ -291,9 +291,9 @@ class Agency(agency.Agency):
     def on_become_slave(self):
         self.start_host_agent = False
         # self._ssh.stop_listening()
-        writer = journaler.BrokerProxyWriter(self._broker)
-        writer.initiate()
-        self._journaler.configure_with(writer)
+        # writer = journaler.BrokerProxyWriter(self._broker)
+        # writer.initiate()
+        # self._journaler.configure_with(writer)
         self._start_slave_gateway()
 
         backend = unix.Slave(self._broker)
@@ -351,7 +351,9 @@ class Agency(agency.Agency):
         self._messaging.remove_backend('unix')
 
         # self._ssh.stop_listening()
-        d = self._journaler.close(flush_writer=False)
+        # d = self._journaler.close(flush_writer=False)
+        d = fiber.Fiber()
+
         if self._gateway:
             d.addCallback(defer.drop_param, self._gateway.cleanup)
 
@@ -364,7 +366,8 @@ class Agency(agency.Agency):
     def remote_get_journaler(self):
         '''Called by the broker internals to establish the bridge between
         JournalWriters'''
-        return self._journaler
+        # return self._journaler
+        return None
 
     def on_killed(self):
         return self._shutdown(stop_process=False, gentle=False)
@@ -399,9 +402,8 @@ class Agency(agency.Agency):
 
     def _disconnect(self):
         self.debug('In agent._disconnect(), '
-                   'gateway: %r, journaler: %r, '
-                   'database: %r, broker: %r', self._gateway,
-                   self._journaler, self._database, self._broker)
+                   'gateway: %r, '
+                   'database: %r, broker: %r', self._gateway, self._database, self._broker)
         d = defer.succeed(None)
 
         handler = lambda msg: (1, error.handle_failure, self, msg)
@@ -415,11 +417,11 @@ class Agency(agency.Agency):
             d.addCallbacks(defer.drop_param, defer.inject_param,
                            callbackArgs=(self.debug, "Gateway stopped"),
                            errbackArgs=handler("Failed stopping gateway"))
-        if self._journaler:
-            d.addCallback(defer.drop_param, self._journaler.close)
-            d.addCallbacks(defer.drop_param, defer.inject_param,
-                           callbackArgs=(self.debug, "Journaler closed"),
-                           errbackArgs=handler("Failed closing journaler"))
+        # if self._journaler:
+        #     d.addCallback(defer.drop_param, self._journaler.close)
+        #     d.addCallbacks(defer.drop_param, defer.inject_param,
+        #                    callbackArgs=(self.debug, "Journaler closed"),
+        #                    errbackArgs=handler("Failed closing journaler"))
 
         if self._database:
             d.addCallback(defer.drop_param, self._database.disconnect)
@@ -649,9 +651,10 @@ class Agency(agency.Agency):
 
     @manhole.expose()
     def snapshot_agents(self, force=False):
-        agency.Agency.snapshot_agents(self, force)
-        if force:
-            return self._broker.broadcast_force_snapshot()
+        return
+        # agency.Agency.snapshot_agents(self, force)
+        # if force:
+        #     return self._broker.broadcast_force_snapshot()
 
     def _setup_snapshoter(self):
         self._snapshot_task = time.callLater(300, self._trigger_snapshot)
