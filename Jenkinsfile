@@ -141,9 +141,9 @@ pipeline {
 //        always {
 //            cleanWs()
 //        }
-        success {
-            notifyBuild(currentBuild.result);
-        }
+//        success {
+//            notifyBuild(currentBuild.result);
+//        }
         failure {
             notifyBuild(currentBuild.result);
             cleanWs()
