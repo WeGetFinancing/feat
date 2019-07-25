@@ -233,12 +233,38 @@ class CouchDB(httpclient.ConnectionPool):
             maximum_connections=maximum_connections,
             security_policy=sp,
             logger=logger,
-            enable_pipelineing=False)
+            enable_pipelineing=False,
+            response_timeout=90
+        )
 
     @defer.inlineCallbacks
     def request(self, method, location, headers=None, body=None, decoder=None,
                 outside_of_the_pool=False, dont_pipeline=False,
                 reset_retry=1):
+        im_done = False
+        attempts = 0
+        exc = None
+        while not im_done and attempts < 3:
+            try:
+                result = yield self.request_inline(method=method, location=location, headers=headers, body=body,
+                                                   decoder=decoder,
+                                                   outside_of_the_pool=outside_of_the_pool, dont_pipeline=dont_pipeline,
+                                                   reset_retry=reset_retry)
+                im_done = True
+                defer.returnValue(result)
+                return
+            except Exception as e:
+                exc = e
+                import traceback
+                log.error("CouchDB Driver", "Exception %s", traceback.format_exc())
+                attempts += 1
+        raise exc
+
+
+    @defer.inlineCallbacks
+    def request_inline(self, method, location, headers=None, body=None, decoder=None,
+                       outside_of_the_pool=False, dont_pipeline=False,
+                       reset_retry=1):
         try:
             elb_cookie = self._gfconfig.get('elbcookie')
             if elb_cookie is not None:
