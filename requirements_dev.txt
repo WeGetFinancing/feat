@@ -1,5 +1,5 @@
 # Packages for security
-safety
+safety<1.9
 piprot
 # Normal dep packages
 bumpversion==0.5.3

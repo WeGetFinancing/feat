@@ -22,12 +22,16 @@
 # Headers in this file shall remain intact.
 from setuptools import setup, find_packages
 
-try:  # for pip >= 10
-    from pip._internal.req import parse_requirements
-    from pip._internal.download import PipSession
-except ImportError:  # for pip <= 9.0.3
+try:  # for pip <= 9.0.3
     from pip.req import parse_requirements
     from pip.download import PipSession
+except ImportError: # for pip >= 10
+    try:
+        from pip._internal.req import parse_requirements
+        from pip._internal.download import PipSession
+    except ImportError:
+        from pip._internal.req import parse_requirements
+        from pip._internal.network.session import PipSession
 
 import sys
 import os
@@ -45,13 +49,23 @@ with open('README.md') as readme_file:
 def read_requirements():
     '''parses requirements from requirements.txt'''
     try:
-        reqs_path = os.path.join(__location__, 'requirements.txt')
+        reqs_path = os.path.join( __location__, 'requirements.txt')
         install_reqs = parse_requirements(reqs_path, session=PipSession())
         # We have to filter out git+ssh as them appear as None, causing the whole install to explode
-        reqs = [str(ir.req) for ir in install_reqs if ir.req is not None]
+        reqs = []
+        for ir in install_reqs:
+            if ir is None:
+                continue
+            if hasattr(ir, 'req'):
+                reqs.append(str(ir.req))
+            else:
+                reqs.append(str(ir.requirement))
+        # reqs = [str(ir.req) for ir in install_reqs if ir.req is not None]
     except Exception:
         # FIXME
         # This is crashing on my side!? make test-all does not work.
+        import traceback
+        print traceback.format_exc()
         reqs = []
     return reqs
 

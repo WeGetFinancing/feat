@@ -21,7 +21,8 @@ pipeline {
         // If not in master branch, use develop for any other branches,
         // as the utility image will not exists for those branches.
         UTIL_TAG = "${env.BRANCH_NAME == master_branch_name ? 'latest' : 'develop'}"
-        SOFT_FAIL = "${env.BRANCH_NAME == master_branch_name ? '|| false' : '|| true'}"
+        //SOFT_FAIL = "${env.BRANCH_NAME == master_branch_name ? '|| false' : '|| true'}"
+        SOFT_FAIL = "${env.BRANCH_NAME == master_branch_name ? '|| true' : '|| true'}"
         DOCKER_COMMAND = "-e HOME=/var/jenkins_home"
     }
 
@@ -57,7 +58,7 @@ pipeline {
                 script {
                     docker.withRegistry(docker_registry, docker_registry_credential) {
                         docker.image(docker_util_image).inside(env.DOCKER_COMMAND) {
-                            sh ". /py27; tox -e 'py27-security'"
+                            sh ". /py27; tox -e 'py27-security' ${SOFT_FAIL}"
                         }
                     }
                 }
