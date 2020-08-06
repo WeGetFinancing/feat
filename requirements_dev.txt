@@ -1,6 +1,7 @@
 # Packages for security
 safety<1.9
 piprot
+dparse<0.5
 # Normal dep packages
 bumpversion==0.5.3
 wheel==0.32.1

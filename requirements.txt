@@ -1,3 +1,5 @@
+# Broken packages forced for python2 compatibility
+setuptools<45 #This was added to force correct install of featcredex, altough it should be moved to feat requirements file. Upgrade was comming from zope.interface referenced within feat.
 raven==6.9.0
 zope.interface==4.5.0
 twisted==14.0.2
