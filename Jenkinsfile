@@ -88,7 +88,7 @@ pipeline {
                             } else {
                                 sh '. /py27; tox -e build-dev'
                             }
-                            release_version= sh(returnStdout: true, script:'python setup.py --version').trim()
+                            release_version= sh(returnStdout: true, script:'. /py27; python setup.py --version').trim()
                         }
                     }
                     sh "git commit -a -m 'Deployment of version ${release_version}, build ${env.BUILD_ID} [ci skip]'"
