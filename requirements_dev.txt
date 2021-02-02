@@ -1,6 +1,13 @@
+setuptools<45 #This was added to force correct install of featcredex, altough it should be moved to feat requirements file. Upgrade was comming from zope.interface referenced within feat.
+# Broken packages forced for python2 compatibility
+pygments<2.6
+configparser<5
+markupsafe<2
 # Packages for security
-safety
+safety<1.9
+dparse<0.5 #depends on safety
 piprot
+dparse<0.5
 # Normal dep packages
 bumpversion==0.5.3
 wheel==0.32.1

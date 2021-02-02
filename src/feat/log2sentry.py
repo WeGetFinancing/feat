@@ -26,6 +26,7 @@ class SentryReporter(object):
                 ],
                 'ignore_exceptions': [
                     '_DefGen_Return',
+                    'StopIteration'
                 ],
                 'release': os.environ.get('APP_RELEASE', '1.0'),
                 'environment': os.environ.get('APP_ENV', 'test'),
